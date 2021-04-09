@@ -1,7 +1,13 @@
-package com.company;/* Generic Min/Max Binary Heap
+/* Generic Min/Max Binary Heap
  * for /r/javaexamples
  *
+ * This was found online at https://gist.github.com/snarkbait/86c7a4bc743e8f327dbc
+ * None of this code is mine (Kyle), I haven't modified it, and it was only used for testing the behaviour of a min heap
  */
+
+
+package com.company;
+
 import java.util.Arrays;
 
 @SuppressWarnings("unchecked")

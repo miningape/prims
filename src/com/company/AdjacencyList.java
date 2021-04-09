@@ -23,8 +23,8 @@ public class AdjacencyList<T> {
     public AdjacencyList() {
         // Using hashmaps for O(1) lookup
         // The arrayList maintains its order but can grow so I use it to store the node that is adjacent and its distance on the same index
-        this.vertices = new HashMap<T, ArrayList<T>>();
-        this.weights = new HashMap<T, ArrayList<Integer>>();
+        this.vertices = new HashMap<>();
+        this.weights = new HashMap<>();
     }
 
     /**
@@ -50,8 +50,8 @@ public class AdjacencyList<T> {
         // If the vertex from has not been used yet we need to create a hashmap for it
         if ( ! this.vertices.containsKey( list ) ) {
             // Add the hashmap to the vertex
-            this.vertices.put( list, new ArrayList<T>() );
-            this.weights.put( list, new ArrayList<Integer>() );
+            this.vertices.put( list, new ArrayList<>() );
+            this.weights.put( list, new ArrayList<>() );
         }
 
         // Add the values
@@ -89,38 +89,40 @@ public class AdjacencyList<T> {
         * */
 
         Set<T> visited                  = new HashSet<>();            // Using this for the O(1) lookup time to check if an element is inside it
-        ArrayList<Edge<T>>     MST    = new ArrayList<Edge<T>>();        // Variable that contains our minimum spanning tree
+        ArrayList<Edge<T>>     MST    = new ArrayList<>();           // Variable that contains our minimum spanning tree
 
-        T current = this.vertices.keySet().iterator().next();
-        PQ.add( new Edge<>( startTitle, current, 0 ) );
+        T current = this.vertices.keySet().iterator().next();         // Get a "random" element to start (its just the element at the top of the vertices key set)
+        PQ.add( new Edge<>( startTitle, current, 0 ) );        // Add an edge from "start" to the first node we will explore from (distance:0 so it doesnt affect calculations)
 
         int numVertices = this.vertices.keySet().size();
 
         // Repeat until we have examined every edge available
         while ( ! PQ.isEmpty() && visited.size() < numVertices ) {  //O(E) in practise probably a lot faster
-            // O( V log E + E log E ) -> O( EV log E ) (Adding complexities because the for loop is implicitely called O(2E) times as that is the total number of elements in adjacency graph)
+            // O( V log E + E log E ) -> O( E+V log E ) (Adding complexities because the for loop is implicitely called O(2E) times as that is the total number of elements in adjacency graph)
             // Pop the queue for the shortest edge
             Edge<T> min = PQ.poll();                                //O(Log E)
             current = min.to;
 
             if ( ! visited.contains( current ) ) {   // If we havent travelled here before ( O(1) )
                 visited.add( current );               // Note that we have been here ( Amortized O(1) )
-                MST.add( min );
+                MST.add( min );                      // O(1)
 
-                // Get adjacent vertices from adj list along with their weights
+                // Get adjacent vertices from adj list along with their weights O(1)
                 ArrayList<T> adjList          =  this.vertices.get( min.to );
                 ArrayList<Integer> weightList =  this.weights.get( min.to );
 
                 // For each vertex that is adjacent
-                for (int i = 0; i < adjList.size(); i++) {          // O(V*deg(V)) = O ( sum( deg(V) ) ) = O( 2E ) (Handshaking lemma) -> O(E)
+                for (int i = 0; i < adjList.size(); i++) {          // special case because runtime is not affected by outer loop: O(V*deg(V)) = O ( sum( deg(V) ) ) = O( 2E ) (Handshaking lemma) -> O(E)
                     // Create edge and add to Priority queue if it connects to an unknown
                     if ( !visited.contains(adjList.get(i)) ) {      // No need to check if cost is lower because it is always lowest thanks to PQ
+                        // Add this new edge to the min-heap
                         PQ.add( new Edge<>( current, adjList.get(i), weightList.get(i) ) ); // O(log E)
                     }
                 }
             }
         }
 
+        // Little bit of error checking to make sure we are getting a minimum spanning tree to all vertices
         if ( visited.size() != numVertices ) {
             for ( Edge<T> e : MST ) {
                 // ! This could also be done in the prims method but I decided to make it separate
